@@ -3,8 +3,8 @@ $ErrorActionPreference = 'Stop'
 
 $scriptName = (Get-Item $PSCommandPath).BaseName
 
-$psd1 = Get-Content (Join-Path $PSScriptRoot "$scriptName.psd1") -Raw `
-    | Invoke-Expression
+$psd1File = Join-Path $PSScriptRoot "$scriptName.psd1"
+$psd1 = Import-PowerShellDataFile -Path $psd1File
 
 $files = $psd1.VariablesToExport + $psd1.FunctionsToExport
 
