@@ -27,28 +27,43 @@ function Add-EnvPath {
         $allPaths += $Path
     }
     end {
-        if ($Variable -notlike 'Env:*') {
-            $Variable = "Env:$Variable"
+
+        $callerErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = [Management.Automation.ActionPreference]::Stop
+
+        try {
+            if ($Variable -notlike 'Env:*') {
+                $Variable = "Env:$Variable"
+            }
+
+            $envValue = Get-Content $Variable -ErrorAction Ignore
+            $envPaths = if ($null -ne $envValue) {
+                $envValue -split [IO.Path]::PathSeparator
+            }
+
+            $filteredPaths = $allPaths `
+                | Where-Object { Test-Path -LiteralPath $_ -PathType Container } `
+                | Where-Object { $_ -notin $envPaths }
+
+            if (!$filteredPaths) {
+                return
+            }
+
+            if ($Prepend) {
+                $envPaths = ($filteredPaths, $envPaths)
+            }
+            else {
+                $envPaths = ($envPaths, $filteredPaths)
+            }
+
+            # ForEach+Where == flatten and exclude null/empty
+            $envValue = $envPaths.ForEach({$_}).Where({$_}) -join [IO.Path]::PathSeparator
+
+            Set-Content $Variable -Value $envValue -PassThru:$PassThru
         }
-
-        $envPaths = (Get-Content $Variable) -split [IO.Path]::PathSeparator
-
-        $filteredPaths = $allPaths `
-            | Where-Object { Test-Path -LiteralPath $_ -PathType Container } `
-            | Where-Object { $_ -notin $envPaths }
-
-        if (!$filteredPaths) {
-            return
+        catch {
+            $global:Error.RemoveAt(0)
+            Write-Error $_ -ErrorAction $callerErrorActionPreference
         }
-
-        if ($Prepend) {
-            $envPaths = $filteredPaths + $envPaths
-        }
-        else {
-            $envPaths += $filteredPaths
-        }
-
-        $envValue = $envPaths -join [IO.Path]::PathSeparator
-        Set-Content $Variable -Value $envValue -PassThru:$PassThru
     }
 }
