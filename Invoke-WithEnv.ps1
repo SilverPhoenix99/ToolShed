@@ -41,7 +41,8 @@ function Invoke-WithEnv {
         return
     }
 
-    $keys = ($Set.Keys + $Prepend.Keys + $Append.Keys).Where({ $_ })
+    # ForEach+Where == flatten and exclude null/empty
+    $keys = ($Set.Keys, $Prepend.Keys, $Append.Keys).ForEach({$_}).Where({$_})
     $oldEnv = @{}
     foreach ($name in $keys) {
         $oldEnv[$name] = (Get-Item -LiteralPath "Env:$name" -ErrorAction Ignore).Value
@@ -53,17 +54,11 @@ function Invoke-WithEnv {
         }
 
         foreach ($var in ${Prepend}?.GetEnumerator()) {
-            $envvar = (Get-Item -LiteralPath "Env:$($var.Name)" -ErrorAction Ignore).Value
-            # ForEach+Where == flatten and exclude null/empty
-            $value = ($var.Value, $envvar).ForEach({$_}).Where({$_}) -join [IO.Path]::PathSeparator
-            Set-Item -LiteralPath "Env:$($var.Name)" -Value $value
+            Add-EnvPath -Variable $var.Name -Path $var.Value -Prepend
         }
 
         foreach ($var in ${Append}?.GetEnumerator()) {
-            $envvar = (Get-Item -LiteralPath "Env:$($var.Name)" -ErrorAction Ignore).Value
-            # ForEach+Where == flatten and exclude null/empty
-            $value = ($envvar, $var.Value).ForEach({$_}).Where({$_}) -join [IO.Path]::PathSeparator
-            Set-Item -LiteralPath "Env:$($var.Name)" -Value $value
+            Add-EnvPath -Variable $var.Name -Path $var.Value
         }
 
         & $ScriptBlock
