@@ -53,14 +53,16 @@ function Invoke-WithEnv {
         }
 
         foreach ($var in ${Prepend}?.GetEnumerator()) {
-            $value = (Get-Item -LiteralPath "Env:$($var.Name)" -ErrorAction Ignore).Value ?? ''
-            $value = @($var.Value, $value) -join [IO.Path]::PathSeparator
+            $envvar = (Get-Item -LiteralPath "Env:$($var.Name)" -ErrorAction Ignore).Value
+            # ForEach+Where == flatten and exclude null/empty
+            $value = ($var.Value, $envvar).ForEach({$_}).Where({$_}) -join [IO.Path]::PathSeparator
             Set-Item -LiteralPath "Env:$($var.Name)" -Value $value
         }
 
         foreach ($var in ${Append}?.GetEnumerator()) {
-            $value = (Get-Item -LiteralPath "Env:$($var.Name)" -ErrorAction Ignore).Value ?? ''
-            $value = @($value, $var.Value) -join [IO.Path]::PathSeparator
+            $envvar = (Get-Item -LiteralPath "Env:$($var.Name)" -ErrorAction Ignore).Value
+            # ForEach+Where == flatten and exclude null/empty
+            $value = ($envvar, $var.Value).ForEach({$_}).Where({$_}) -join [IO.Path]::PathSeparator
             Set-Item -LiteralPath "Env:$($var.Name)" -Value $value
         }
 

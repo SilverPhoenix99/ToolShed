@@ -8,7 +8,7 @@
 
 @{
 
-ModuleVersion = '1.1.0'
+ModuleVersion = '1.1.1'
 GUID = '36c8e92f-912e-496b-9369-af30b0300da5'
 Author = 'SilverPhoenix99'
 Copyright = '(c) SilverPhoenix99. All rights reserved.'
