@@ -8,7 +8,7 @@
 
 @{
 
-ModuleVersion = '1.1.3'
+ModuleVersion = '1.2.0'
 GUID = '36c8e92f-912e-496b-9369-af30b0300da5'
 Author = 'SilverPhoenix99'
 Copyright = '(c) SilverPhoenix99. All rights reserved.'
@@ -57,6 +57,9 @@ ScriptsToProcess = @()
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
     'Add-EnvPath'
+    'ConvertFrom-Base64'
+    'ConvertTo-Base64'
+    'Format-Xml'
     'Get-DirectoryAncestors'
     'Invoke-WithEnv'
 )
@@ -70,6 +73,7 @@ VariablesToExport = @()
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
 AliasesToExport = @(
     'env'
+    'fx'
 )
 
 # DSC resources to export from this module
